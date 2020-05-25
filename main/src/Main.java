@@ -1,54 +1,35 @@
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
+import java.util.Map;
 
-/**
- * 功能描述：
- *
- * @version 1.0.0
- * @since 2020-05-25
- */
 public class Main {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
 
-    private TreeMap<Long, MemcachedNode> ketamaNodes;
+        List<Ketama.MemcachedNode> node = new ArrayList<>();
 
-    protected void setKetamaNodes(List<MemcachedNode> nodes) throws NoSuchAlgorithmException {
-        TreeMap<Long, MemcachedNode> newNodeMap = new TreeMap<>();
-        int numReps = 20;
+        for (int i = 0; i < 10; i++) {
+            node.add(new Ketama.MemcachedNode("127.0.0." + (i + 1)));
+        }
 
-        for (MemcachedNode node : nodes) {
-            for (int i = 0; i < numReps / 4; i++) {
-                MessageDigest md5 = MessageDigest.getInstance("MD5");
+        Ketama ketama = new Ketama();
+        ketama.setKetamaNodes(node);
 
-                md5.update(getKeyForNode(node, i));
-                byte[] digest = md5.digest();
-
-                // 一个md5，可产生4个唯一key
-                for (int j = 0; j < 4; j++) {
-                    Long k = ((long) (digest[3 + j * 4] & 0xFF) << 24) | ((long) (digest[2 + j * 4] & 0xFF) << 16) | (
-                        (long) (digest[1 + j * 4] & 0xFF) << 8) | (long) (digest[j * 4] & 0xFF);
-                    newNodeMap.put(k, node);
-                    System.out.println(String.format("Adding node %s in position %d", node, k));
-                }
-
+        Map<Ketama.MemcachedNode, Integer> nodes = new HashMap<>();
+        // 10w个key测试分布
+        for (int i = 0; i < 100000; i++) {
+            Ketama.MemcachedNode o = ketama.getKetemaNodeForKey(i + "");
+            if (nodes.containsKey(o)) {
+                nodes.put(o, nodes.get(o) + 1);
+            } else {
+                nodes.put(o, 1);
             }
         }
 
-        assert newNodeMap.size() == numReps * nodes.size();
-        ketamaNodes = newNodeMap;
+        nodes.forEach(
+            (memcachedNode, integer) -> System.out.println(
+                memcachedNode.toString() + " " + "的比率是" + ((float) integer / 100000) * 100 + "%"));
 
-    }
-
-    class MemcachedNode {
-        private String ip;
-
-        public String getIp() {
-            return ip;
-        }
-    }
-
-    private byte[] getKeyForNode(MemcachedNode node, int virtualNodeGroupNum) {
-        return (node.getIp() + "#" + virtualNodeGroupNum).getBytes();
     }
 }
