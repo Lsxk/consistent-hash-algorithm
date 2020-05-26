@@ -9,7 +9,7 @@ public class Main {
 
         List<Ketama.MemcachedNode> node = new ArrayList<>();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             node.add(new Ketama.MemcachedNode("127.0.0." + (i + 1)));
         }
 

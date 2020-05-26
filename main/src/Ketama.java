@@ -1,6 +1,7 @@
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -81,6 +82,23 @@ public class Ketama {
             return "MemcachedNode{" +
                 "ip='" + ip + '\'' +
                 '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            MemcachedNode that = (MemcachedNode) o;
+            return Objects.equals(ip, that.ip);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(ip);
         }
     }
 
